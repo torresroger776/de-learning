@@ -218,12 +218,12 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14
   <div class="nav-item" onclick="go('export',this)"><span class="nav-icon">↑</span>Export / import</div>
   <div class="sidebar-footer"><div class="sf-text">All data in localStorage.<br>Export regularly.</div></div>
 </nav>
+<main class="main">
 <div class="sync-bar" id="sync-bar">
   <div class="sync-dot none" id="sync-dot"></div>
   <span class="sync-msg" id="sync-msg">Sync not configured — go to Export / import to set up GitHub Gist sync</span>
-  <button class="btn" style="padding:3px 8px;font-size:10px" onclick="go('export',document.querySelectorAll('.nav-item')[5])">configure</button>
+  <button class="btn" style="padding:3px 8px;font-size:10px" onclick="goExport()">configure</button>
 </div>
-<main class="main">
 
 <div class="page active" id="page-today">
   <div class="page-header"><div class="page-title">Today</div><div class="page-sub" id="today-date"></div></div>
@@ -345,7 +345,7 @@ const DEFAULT_BATCHES=[
     {id:"terraform",name:"Terraform",sub:"IaC, Snowflake provider, state management, modules",resource:"HashiCorp Learn",notes:""},
     {id:"datamodel",name:"Data modeling & warehousing",sub:"Kimball, dimensional modeling, star schemas, SCDs",resource:"The Data Warehouse Toolkit",notes:""},
     {id:"agile",name:"Agile methodology",sub:"Scrum, Kanban, ceremonies, backlog, estimation",resource:"Scrum Guide + Atlassian",notes:""},
-    {id:"claudeai",name:"Claude Code + AI in DE",sub:"Agentic coding, prompt engineering, AI-assisted workflows",resource:"Anthropic docs + hands-on",notes:""},
+    {id:"claudeai",name:"Claude Code + AI in DE",sub:"Agentic coding, prompt engineering, AI-assisted workflows",resource:"Anthropic docs + hands-on",notes:""}
   ]},
   {id:"b1",label:"Batch 2 — next up",badge:"n",skills:[
     {id:"dagster",name:"Dagster",sub:"Assets, jobs, resources, sensors, schedules, partitions",resource:"Dagster docs + dagster-university",notes:""},
@@ -353,7 +353,7 @@ const DEFAULT_BATCHES=[
     {id:"observability",name:"Observability & monitoring",sub:"dbt tests, Elementary, alerting, freshness",resource:"Elementary docs",notes:""},
     {id:"dq",name:"Data quality",sub:"Great Expectations, Soda, expectation suites",resource:"GX docs",notes:""},
     {id:"aiagents",name:"AI agents & LLM tooling",sub:"Agentic workflows, RAG, tool use",resource:"Anthropic cookbook",notes:""},
-    {id:"lineage",name:"Data lineage & governance",sub:"Column-level lineage, catalogs, access control",resource:"OpenMetadata docs",notes:""},
+    {id:"lineage",name:"Data lineage & governance",sub:"Column-level lineage, catalogs, access control",resource:"OpenMetadata docs",notes:""}
   ]},
   {id:"b2",label:"Batch 3 — horizon",badge:"l",skills:[
     {id:"spark",name:"Apache Spark",sub:"RDDs, DataFrames, PySpark, Spark SQL",resource:"Learning Spark (O'Reilly)",notes:""},
@@ -361,12 +361,12 @@ const DEFAULT_BATCHES=[
     {id:"bigdata",name:"Big data fundamentals",sub:"Distributed systems, storage formats, ecosystem",resource:"Fundamentals of Data Engineering",notes:""},
     {id:"cloudarch",name:"Cloud architecture",sub:"Azure/AWS storage, compute, networking, cost",resource:"AZ-900 prep",notes:""},
     {id:"mlops",name:"MLOps fundamentals",sub:"Feature stores, model serving, ML pipelines",resource:"Designing ML Systems (Huyen)",notes:""},
-    {id:"sysdesign",name:"System design for data",sub:"Lakehouse, lambda/kappa arch, scalability",resource:"DDIA + staff eng blogs",notes:""},
+    {id:"sysdesign",name:"System design for data",sub:"Lakehouse, lambda/kappa arch, scalability",resource:"DDIA + staff eng blogs",notes:""}
   ]},
   {id:"b3",label:"Async / continuous",badge:"x",skills:[
     {id:"dbt_adv",name:"dbt advanced (async)",sub:"Macros, packages, metadata API, advanced patterns",resource:"dbt advanced courses",notes:""},
     {id:"snowadv",name:"Snowflake advanced (async)",sub:"Cost optimization, dynamic tables, Snowpark",resource:"Snowflake advanced training",notes:""},
-    {id:"softeng",name:"Software engineering practices",sub:"Testable code, design patterns, code review",resource:"Clean Code",notes:""},
+    {id:"softeng",name:"Software engineering practices",sub:"Testable code, design patterns, code review",resource:"Clean Code",notes:""}
   ]}
 ];
 
@@ -379,14 +379,14 @@ const SUGGESTED_UNITS={
     {name:"Window functions",est:40},
     {name:"Snowflake: VARIANT & semi-structured data",est:35},
     {name:"Snowflake: query optimization & explain plan",est:40},
-    {name:"Snowflake: time travel & cloning",est:25},
+    {name:"Snowflake: time travel & cloning",est:25}
   ],
   git:[
     {name:"Getting started & Git basics (Ch1–2)",est:40},
     {name:"Branching (Ch3)",est:45},
     {name:"Distributed workflows (Ch5)",est:35},
     {name:"Git tools: stash, rebase, reset (Ch7)",est:50},
-    {name:"Customizing & Git internals (Ch8–9)",est:40},
+    {name:"Customizing & Git internals (Ch8–9)",est:40}
   ],
   python:[
     {name:"Pythonic thinking (items 1–10)",est:45},
@@ -394,7 +394,7 @@ const SUGGESTED_UNITS={
     {name:"Functions & closures (items 21–28)",est:40},
     {name:"Classes & interfaces (items 37–46)",est:45},
     {name:"Concurrency & parallelism (items 52–60)",est:50},
-    {name:"Robustness & testing (items 66–74)",est:45},
+    {name:"Robustness & testing (items 66–74)",est:45}
   ],
   snowflake:[
     {name:"Architecture overview & virtual warehouses",est:40},
@@ -403,7 +403,7 @@ const SUGGESTED_UNITS={
     {name:"Access control & RBAC",est:40},
     {name:"Performance & query optimization",est:50},
     {name:"Cost management & resource monitors",est:40},
-    {name:"Data sharing & marketplace",est:35},
+    {name:"Data sharing & marketplace",est:35}
   ],
   azdevops:[
     {name:"Introduction to Azure DevOps",est:30},
@@ -412,7 +412,7 @@ const SUGGESTED_UNITS={
     {name:"Build pipelines for dbt + SQL",est:45},
     {name:"Release pipelines & environments",est:40},
     {name:"Approvals, gates & rollback",est:35},
-    {name:"Integrating Terraform into pipelines",est:40},
+    {name:"Integrating Terraform into pipelines",est:40}
   ],
   terraform:[
     {name:"Terraform basics: init, plan, apply",est:40},
@@ -421,7 +421,7 @@ const SUGGESTED_UNITS={
     {name:"Modules: creating & using",est:45},
     {name:"Snowflake provider: databases, schemas, roles",est:45},
     {name:"Snowflake provider: warehouses & grants",est:40},
-    {name:"CI/CD: Terraform in Azure Pipelines",est:40},
+    {name:"CI/CD: Terraform in Azure Pipelines",est:40}
   ],
   datamodel:[
     {name:"Ch1: Dimensional modeling introduction",est:50},
@@ -431,16 +431,15 @@ const SUGGESTED_UNITS={
     {name:"Ch5: Orders — many-to-many relationships",est:50},
     {name:"Ch9: HR — slowly changing dimensions",est:55},
     {name:"Ch17: Enterprise DW bus architecture",est:50},
-    {name:"Ch18: ETL design patterns",est:50},
+    {name:"Ch18: ETL design patterns",est:50}
   ],
   agile:[
     {name:"Scrum Guide: full read + reflection",est:40},
     {name:"Atlassian: sprints, ceremonies & artifacts",est:35},
     {name:"Atlassian: Kanban & flow management",est:35},
     {name:"Atlassian: backlog refinement & estimation",est:35},
-    {name:"Agile for data engineering teams",est:40},
+    {name:"Agile for data engineering teams",est:40}
   ],
-,
   semanticlayer:[
     {name:"dbt semantic layer: what it is and why it matters",est:35},
     {name:"MetricFlow: metrics, dimensions, entities",est:45},
@@ -448,8 +447,8 @@ const SUGGESTED_UNITS={
     {name:"dbt exposures and contracts for downstream consumers",est:40},
     {name:"Designing marts for agent consumption: principles",est:45},
     {name:"Connecting a semantic layer to an AI agent / BI tool",est:55},
-    {name:"Testing and validating your semantic layer",est:40},
-  ],
+    {name:"Testing and validating your semantic layer",est:40}
+  ]
 };
 
 // ─── STATE ──────────────────────────────────────────────────────────────────
@@ -473,7 +472,7 @@ function freshState(){
       pendingRecallSkillId:null,
       pendingRecallUnitIndex:null,
       asyncSkillId:null,
-      asyncUnitIndex:null,
+      asyncUnitIndex:null
     }
   };
 }
@@ -492,7 +491,14 @@ function getUnits(sid){return S.skillUnits[sid]||[];}
 
 let S=loadState();
 function loadState(){try{const r=localStorage.getItem('de_v8');if(r)return JSON.parse(r);}catch(e){}return freshState();}
-function save(){try{localStorage.setItem('de_v8',JSON.stringify(S));}catch(e){}}
+function saveLocal(){try{localStorage.setItem('de_v8',JSON.stringify(S));}catch(e){}}
+let _gistSaveTimer = null;
+function save(){
+  saveLocal();
+  clearTimeout(_gistSaveTimer);
+  _gistSaveTimer = setTimeout(()=>gistSave(), 1500);
+}
+
 function todayStr(){return new Date().toDateString();}
 
 function checkRollover(){
@@ -504,9 +510,9 @@ function checkRollover(){
       pendingRecallSkillId:S.today.pendingRecallSkillId,
       pendingRecallUnitIndex:S.today.pendingRecallUnitIndex,
       asyncSkillId:null,      // async slot resets each day
-      asyncUnitIndex:null,
+      asyncUnitIndex:null
     };
-    save();
+    saveLocal();
   }
   // Backfill async fields for state loaded before this version
   if(S.today.asyncSkillId===undefined){S.today.asyncSkillId=null;S.today.asyncUnitIndex=null;}
@@ -568,7 +574,7 @@ function buildQueue(){
       S.today.pendingRecallWarning=false;
       S.today.pendingRecallSkillId=null;
       S.today.pendingRecallUnitIndex=null;
-      save();
+      saveLocal();
     }
   }
 
@@ -774,7 +780,7 @@ function buildQueue(){
         });
       } else {
         // All async steps done today — clear the slot
-        S.today.asyncSkillId=null;S.today.asyncUnitIndex=null;save();
+        S.today.asyncSkillId=null;S.today.asyncUnitIndex=null;saveLocal();
       }
     }
   }
@@ -898,19 +904,19 @@ function markStep(skillId,unitIndex,step,taskId){
     t.pendingRecallSkillId=null;
     t.pendingRecallUnitIndex=null;
   }
-  save(); renderToday(); renderSkillsAll();
+  saveLocal(); renderToday(); renderSkillsAll();
 }
 function markSR(recallId,taskId){
   const r=S.spacedRecalls.find(x=>x.id===recallId);
   if(r)r.done=true;
   if(!S.today.completedSteps.includes("sr-"+recallId))S.today.completedSteps.push("sr-"+recallId);
-  save(); renderToday();
+  saveLocal(); renderToday();
 }
 function closePhase(skillId){
   if(!confirm("Close this phase for "+skillId+"? This will trigger the synthesis task. You can add more units after synthesizing."))return;
   const sp=getSP(skillId);
   sp.phaseDone=true;
-  save(); renderToday(); renderSkillsAll();
+  saveLocal(); renderToday(); renderSkillsAll();
 }
 function markSynthesis(skillId,taskId){
   const sp=getSP(skillId);
@@ -918,24 +924,24 @@ function markSynthesis(skillId,taskId){
   // Reset phaseDone so a new phase can be opened by adding more units
   sp.phaseDone=false;
   if(!S.today.completedSteps.includes(skillId+"-synthesis"))S.today.completedSteps.push(skillId+"-synthesis");
-  save(); renderToday(); renderSkillsAll();
+  saveLocal(); renderToday(); renderSkillsAll();
 }
 function markBuild(taskId){
   if(!S.today.completedSteps.includes(taskId))S.today.completedSteps.push(taskId);
-  save(); renderToday();
+  saveLocal(); renderToday();
 }
 function markBookStep(bookId,bIdx,step,taskId){
   const key="book-"+bookId+"-"+bIdx+"-"+step;
   if(!S.today.completedSteps.includes(key))S.today.completedSteps.push(key);
   if(step==="notes"){const sp=getSP(bookId);sp.unitsCompleted++;sp.currentUnitIndex=bIdx+1;}
-  save(); renderToday();
+  saveLocal(); renderToday();
 }
 function markCarryforward(skillId,unitIndex,taskId){
   // Marks the recall step as done
   const key=skillId+"-"+unitIndex+"-recall";
   if(!S.today.completedSteps.includes(key))S.today.completedSteps.push(key);
   S.today.pendingRecallWarning=false;S.today.pendingRecallSkillId=null;S.today.pendingRecallUnitIndex=null;
-  save(); renderToday();
+  saveLocal(); renderToday();
 }
 
 function markReadingStep(rBookId,rIdx,step,taskId){
@@ -948,7 +954,7 @@ function markReadingStep(rBookId,rIdx,step,taskId){
     S.readingProgress[rBookId].chaptersCompleted++;
     S.readingProgress[rBookId].currentChapterIndex=rIdx+1;
   }
-  save(); renderToday(); renderReading();
+  saveLocal(); renderToday(); renderReading();
 }
 
 function markAsyncStep(skillId,unitIndex,step,taskId){
@@ -966,7 +972,7 @@ function markAsyncStep(skillId,unitIndex,step,taskId){
     // Clear the async slot
     t.asyncSkillId=null;t.asyncUnitIndex=null;
   }
-  save(); renderToday(); renderSkillsAll();
+  saveLocal(); renderToday(); renderSkillsAll();
 }
 
 function scheduleRecalls(skillId,unitIndex){
@@ -985,11 +991,11 @@ function skipUnit(){
   const sp=getSP(S.activeSkillId);
   sp.currentUnitIndex++;
   S.today.pendingRecallWarning=false;S.today.pendingRecallSkillId=null;S.today.pendingRecallUnitIndex=null;
-  save(); renderToday();
+  saveLocal(); renderToday();
 }
 function resetToday(){
   S.today={date:todayStr(),completedSteps:[],pendingRecallWarning:false,pendingRecallSkillId:null,pendingRecallUnitIndex:null};
-  save(); renderToday();
+  saveLocal(); renderToday();
 }
 
 // ─── SKILLS ──────────────────────────────────────────────────────────────────
@@ -1033,7 +1039,7 @@ function renderSkillsBatch(bi){
       {label:"Orient",done:sp.stageOrient,active:!sp.stageOrient&&isCur},
       {label:`Study ${sp.unitsCompleted}/${units.length||'?'}`,done:units.length>0&&sp.unitsCompleted>=units.length,active:sp.stageOrient&&units.length>0&&sp.unitsCompleted<units.length&&isCur},
       {label:"Apply",done:sp.stageApply,active:sp.stageOrient&&!sp.stageApply&&isCur},
-      {label:"Consolidate",done:sp.stageConsolidate,active:sp.stageApply&&!sp.stageConsolidate&&isCur},
+      {label:"Consolidate",done:sp.stageConsolidate,active:sp.stageApply&&!sp.stageConsolidate&&isCur}
     ];
     const stagesHtml=stages.map(s=>`<span class="stage-pip${s.done?' done':s.active?' active':''}">${s.label}</span>`).join('');
     const div=document.createElement("div");div.className="skill-card"+(isCur?" is-current":"");
@@ -1057,14 +1063,14 @@ function renderSkillsBatch(bi){
   });
 }
 
-function setActive(id){S.activeSkillId=id;S.today.pendingRecallWarning=false;S.today.pendingRecallSkillId=null;S.today.pendingRecallUnitIndex=null;save();renderSkillsAll();renderToday();}
+function setActive(id){S.activeSkillId=id;S.today.pendingRecallWarning=false;S.today.pendingRecallSkillId=null;S.today.pendingRecallUnitIndex=null;saveLocal();renderSkillsAll();renderToday();}
 function activateAsyncUnit(skillId,unitIndex){
   if(S.today.asyncSkillId&&S.today.asyncSkillId!==skillId){
     if(!confirm("Replace today's async unit ("+S.today.asyncSkillId+") with "+skillId+"?"))return;
   }
   S.today.asyncSkillId=skillId;
   S.today.asyncUnitIndex=unitIndex;
-  save(); renderToday(); renderUnits();
+  saveLocal(); renderToday(); renderUnits();
   // Navigate to Today tab
   const todayNav=document.querySelector('.nav-item');
   if(todayNav)go('today',todayNav);
@@ -1072,9 +1078,9 @@ function activateAsyncUnit(skillId,unitIndex){
 
 function toggleBatch(bi){document.getElementById("bb-"+bi).classList.toggle("hidden");document.getElementById("bhdr-"+bi).classList.toggle("collapsed");}
 function toggleNotes(btn){const w=btn.closest(".skill-card").querySelector(".notes-wrap");w.classList.toggle("open");btn.textContent=w.classList.contains("open")?"hide notes":"notes";}
-function saveSkNote(bi,si,v){S.batches[bi].skills[si].notes=v;save();}
-function addSkill(bi){const inp=document.getElementById("ai-"+bi);const name=inp.value.trim();if(!name)return;const id="s"+Date.now();S.batches[bi].skills.push({id,name,sub:"",resource:"",notes:""});inp.value="";save();renderSkillsBatch(bi);}
-function removeSkill(bi,si){if(!confirm('Remove "'+S.batches[bi].skills[si].name+'"?'))return;S.batches[bi].skills.splice(si,1);save();renderSkillsBatch(bi);}
+function saveSkNote(bi,si,v){S.batches[bi].skills[si].notes=v;saveLocal();}
+function addSkill(bi){const inp=document.getElementById("ai-"+bi);const name=inp.value.trim();if(!name)return;const id="s"+Date.now();S.batches[bi].skills.push({id,name,sub:"",resource:"",notes:""});inp.value="";saveLocal();renderSkillsBatch(bi);}
+function removeSkill(bi,si){if(!confirm('Remove "'+S.batches[bi].skills[si].name+'"?'))return;S.batches[bi].skills.splice(si,1);saveLocal();renderSkillsBatch(bi);}
 
 // ─── READING ─────────────────────────────────────────────────────────────────
 function renderReading(){
@@ -1164,7 +1170,7 @@ function addBook(){
   S.reading.books.push({id,title,author,chapters:[]});
   document.getElementById("new-book-title").value="";
   document.getElementById("new-book-author").value="";
-  save(); renderReading();
+  saveLocal(); renderReading();
 }
 
 function addChapter(bookId){
@@ -1175,7 +1181,7 @@ function addChapter(bookId){
   const book=S.reading.books.find(b=>b.id===bookId);
   if(book){book.chapters.push({name,est});}
   nameEl.value=""; estEl.value="45";
-  save(); renderReading();
+  saveLocal(); renderReading();
 }
 
 function setActiveBook(bookId){
@@ -1184,13 +1190,13 @@ function setActiveBook(bookId){
     if(!confirm("Switch active book? Your progress on the current book is saved."))return;
   }
   S.reading.activeBookId=bookId;
-  save(); renderReading(); renderToday();
+  saveLocal(); renderReading(); renderToday();
 }
 
 function clearActiveBook(){
   if(!confirm("Remove active book? Your progress is saved — you can re-activate it later."))return;
   S.reading.activeBookId=null;
-  save(); renderReading(); renderToday();
+  saveLocal(); renderReading(); renderToday();
 }
 
 function deleteBook(bi){
@@ -1198,7 +1204,7 @@ function deleteBook(bi){
   if(!confirm('Remove "'+book.title+'"? This cannot be undone.'))return;
   if(S.reading.activeBookId===book.id)S.reading.activeBookId=null;
   S.reading.books.splice(bi,1);
-  save(); renderReading();
+  saveLocal(); renderReading();
 }
 
 // ─── UNITS ───────────────────────────────────────────────────────────────────
@@ -1250,25 +1256,25 @@ function addUnit(sid){
   if(!S.skillUnits[sid])S.skillUnits[sid]=[];
   S.skillUnits[sid].push({name,est});
   n.value="";e.value="30";
-  save();renderUnits();renderToday();
+  saveLocal();renderUnits();renderToday();
 }
 function delUnit(sid,idx){
   if(!confirm("Remove unit? Cannot be undone."))return;
   S.skillUnits[sid].splice(idx,1);
   const sp=getSP(sid);if(sp.currentUnitIndex>idx)sp.currentUnitIndex--;
-  save();renderUnits();
+  saveLocal();renderUnits();
 }
 function loadSuggested(sid){
   if(!S.skillUnits[sid])S.skillUnits[sid]=[];
   S.skillUnits[sid]=[...SUGGESTED_UNITS[sid]];
-  save();renderUnits();renderToday();
+  saveLocal();renderUnits();renderToday();
 }
 
 // ─── EXPORT ───────────────────────────────────────────────────────────────────
 function refreshExport(){const el=document.getElementById("export-area");if(el)el.textContent=JSON.stringify(S,null,2);}
 function copyExport(){navigator.clipboard.writeText(JSON.stringify(S,null,2)).then(()=>{const m=document.getElementById("export-msg");m.className="msg-ok";m.textContent="Copied.";setTimeout(()=>m.textContent="",2500);});}
 function downloadExport(){const b=new Blob([JSON.stringify(S,null,2)],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="de_learning_system_"+new Date().toISOString().slice(0,10)+".json";a.click();}
-function doImport(){const ta=document.getElementById("import-ta");const m=document.getElementById("import-msg");try{S=JSON.parse(ta.value.trim());save();renderAll();m.className="msg-ok";m.textContent="Imported.";setTimeout(()=>m.textContent="",2500);}catch(e){m.className="msg-err";m.textContent="Invalid JSON.";}}
+function doImport(){const ta=document.getElementById("import-ta");const m=document.getElementById("import-msg");try{S=JSON.parse(ta.value.trim());saveLocal();renderAll();m.className="msg-ok";m.textContent="Imported.";setTimeout(()=>m.textContent="",2500);}catch(e){m.className="msg-err";m.textContent="Invalid JSON.";}}
 
 // ─── NAV ─────────────────────────────────────────────────────────────────────
 function go(id,el){
@@ -1279,7 +1285,11 @@ function go(id,el){
   if(id==="skills")renderSkillsAll();
   if(id==="units")renderUnits();
   if(id==="reading")renderReading();
-  if(id==="export")refreshExport();
+  if(id==="export"){refreshExport();renderGistSetup();}
+}
+function goExport(){
+  const navItems = document.querySelectorAll('.nav-item');
+  navItems.forEach(n=>{ if(n.textContent.trim().startsWith('Export')) go('export',n); });
 }
 function renderAll(){renderToday();renderSkillsAll();renderUnits();renderReading();refreshExport();renderGistSetup();}
 
@@ -1317,7 +1327,7 @@ async function gistLoad(){
     const gistSession  = parsed.sessionCount || 0;
     if(gistSession >= localSession){
       S = parsed;
-      save();
+      saveLocal();
       renderAll();
     }
     setSyncStatus('ok', 'Synced from Gist · ' + new Date().toLocaleTimeString());
@@ -1370,7 +1380,7 @@ async function gistCreateAndSave(token){
 }
 
 function saveState_withSync(){
-  save();
+  saveLocal();
   gistSave();
 }
 
@@ -1445,14 +1455,7 @@ function clearGistCreds(){
   renderGistSetup();
 }
 
-// Patch all save calls to also sync to Gist
-const _origSave = save;
-function save(){
-  _origSave();
-  // Debounced Gist save — avoid hammering API on rapid changes
-  clearTimeout(save._timer);
-  save._timer = setTimeout(()=>gistSave(), 1500);
-}
+
 
 // On load: try to pull from Gist if configured
 (async function init(){
