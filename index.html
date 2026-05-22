@@ -140,6 +140,9 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14
 .unit-dot.u-pend{background:var(--bg3);color:var(--text3)}
 .unit-name-txt{flex:1;font-size:12px;font-family:var(--mono);color:var(--text2)}
 .unit-est-txt{font-size:10px;font-family:var(--mono);color:var(--text3);white-space:nowrap}
+.unit-move{font-size:12px;color:var(--text3);background:none;border:none;cursor:pointer;padding:0 3px;font-family:var(--mono);line-height:1;transition:color .12s}
+.unit-move:hover:not(:disabled){color:var(--text2)}
+.unit-move:disabled{opacity:.25;cursor:default}
 .unit-del{font-size:13px;color:var(--text3);background:none;border:none;cursor:pointer;padding:0 4px;font-family:var(--mono)}
 .unit-del:hover{color:var(--red)}
 .unit-add-row{display:flex;gap:6px;margin-top:.75rem;flex-wrap:wrap;align-items:center}
@@ -203,7 +206,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14
 <div class="shell">
 <nav class="sidebar">
   <div class="sidebar-logo">
-    <div class="logo-tag">v2.5</div>
+    <div class="logo-tag">v2.6</div>
     <div class="logo-title">DE<br><span class="logo-accent">Learning</span></div>
   </div>
   <div class="nav-section">Daily</div>
@@ -335,24 +338,27 @@ const STEP_META={
 const BOOK_STEPS=["prime","consume","recall","notes"];
 
 const DEFAULT_BATCHES=[
-  {id:"b0",label:"Batch 1 — active",badge:"a",skills:[
-    {id:"dbt",name:"dbt",sub:"Modeling, tests, docs, macros, incremental, deployment",resource:"dbt Learn courses",notes:""},
+  {id:"b_priority",label:"Priority — work objectives",badge:"p",skills:[
+    {id:"dbt",name:"dbt",sub:"Modeling, tests, docs, macros, incremental, deployment — convert pipeline to dbt DAG",resource:"dbt Learn courses",notes:""},
+    {id:"azdevops",name:"Azure DevOps + CI/CD",sub:"Azure Pipelines, YAML, environments, approvals — CI/CD for dbt pipeline",resource:"Microsoft Learn: Azure DevOps",notes:""},
+    {id:"claudeai",name:"Agentic coding & LLM workflows",sub:"Claude Code, prompt engineering, AI-assisted development, productive LLM use",resource:"Anthropic docs + Claude Code + hands-on",notes:""},
+    {id:"semanticlayer",name:"Semantic layer & AI-ready data",sub:"dbt semantic layer / MetricFlow, mart design for agent consumption, exposures, contracts",resource:"dbt docs: semantic layer + MetricFlow docs",notes:""}
+  ]},
+  {id:"b0",label:"Batch 1 — core skills",badge:"a",skills:[
     {id:"sql",name:"SQL",sub:"Window functions, CTEs, optimization, Snowflake SQL",resource:"Mode SQL tutorial + Snowflake docs",notes:""},
     {id:"git",name:"Git",sub:"Branching, PRs, rebase, team workflows",resource:"Pro Git (progit.org — free)",notes:""},
     {id:"python",name:"Python for DE",sub:"Pandas, file I/O, API calls, pytest, packaging",resource:"Effective Python (Slatkin)",notes:""},
     {id:"snowflake",name:"Snowflake",sub:"Architecture, virtual warehouses, RBAC, cost optimization",resource:"Snowflake University",notes:""},
-    {id:"azdevops",name:"Azure DevOps + CI/CD",sub:"Azure Pipelines, YAML, environments, approvals",resource:"Microsoft Learn: Azure DevOps",notes:""},
     {id:"terraform",name:"Terraform",sub:"IaC, Snowflake provider, state management, modules",resource:"HashiCorp Learn",notes:""},
     {id:"datamodel",name:"Data modeling & warehousing",sub:"Kimball, dimensional modeling, star schemas, SCDs",resource:"The Data Warehouse Toolkit",notes:""},
-    {id:"agile",name:"Agile methodology",sub:"Scrum, Kanban, ceremonies, backlog, estimation",resource:"Scrum Guide + Atlassian",notes:""},
-    {id:"claudeai",name:"Claude Code + AI in DE",sub:"Agentic coding, prompt engineering, AI-assisted workflows",resource:"Anthropic docs + hands-on",notes:""}
+    {id:"agile",name:"Agile methodology",sub:"Scrum, Kanban, ceremonies, backlog, estimation",resource:"Scrum Guide + Atlassian",notes:""}
   ]},
   {id:"b1",label:"Batch 2 — next up",badge:"n",skills:[
     {id:"dagster",name:"Dagster",sub:"Assets, jobs, resources, sensors, schedules, partitions",resource:"Dagster docs + dagster-university",notes:""},
     {id:"docker",name:"Docker",sub:"Images, containers, Compose, registries",resource:"Docker docs",notes:""},
     {id:"observability",name:"Observability & monitoring",sub:"dbt tests, Elementary, alerting, freshness",resource:"Elementary docs",notes:""},
     {id:"dq",name:"Data quality",sub:"Great Expectations, Soda, expectation suites",resource:"GX docs",notes:""},
-    {id:"aiagents",name:"AI agents & LLM tooling",sub:"Agentic workflows, RAG, tool use",resource:"Anthropic cookbook",notes:""},
+    {id:"aiagents",name:"AI agents & LLM tooling",sub:"Agentic workflows, RAG, tool use, LangChain basics",resource:"Anthropic cookbook",notes:""},
     {id:"lineage",name:"Data lineage & governance",sub:"Column-level lineage, catalogs, access control",resource:"OpenMetadata docs",notes:""}
   ]},
   {id:"b2",label:"Batch 3 — horizon",badge:"l",skills:[
@@ -368,7 +374,7 @@ const DEFAULT_BATCHES=[
     {id:"snowadv",name:"Snowflake advanced (async)",sub:"Cost optimization, dynamic tables, Snowpark",resource:"Snowflake advanced training",notes:""},
     {id:"softeng",name:"Software engineering practices",sub:"Testable code, design patterns, code review",resource:"Clean Code",notes:""}
   ]}
-];
+]
 
 const SUGGESTED_UNITS={
   sql:[
@@ -1227,7 +1233,10 @@ function renderUnits(){
         ?`<button class="add-btn" style="font-size:10px;padding:2px 7px" onclick="activateAsyncUnit('${sk.id}',${i})">work today</button>`
         :alreadyActive?`<span style="font-size:10px;font-family:var(--mono);color:var(--accent)">on today's queue</span>`
         :'';
-      return`<div class="unit-row"><div class="unit-dot ${cls}">${char}</div><div class="unit-name-txt">${u.name}</div><div class="unit-est-txt">~${u.est}m</div>${asyncBtn}<button class="unit-del" onclick="delUnit('${sk.id}',${i})" title="Remove">×</button></div>`;
+      const canMoveUp=i>sp.currentUnitIndex;
+      const canMoveDown=i<units.length-1&&i>=sp.currentUnitIndex;
+      const moveBtns=`<button class="unit-move" onclick="moveUnit('${sk.id}',${i},-1)" ${canMoveUp?'':'disabled'} title="Move up">↑</button><button class="unit-move" onclick="moveUnit('${sk.id}',${i},1)" ${canMoveDown?'':'disabled'} title="Move down">↓</button>`;
+      return`<div class="unit-row"><div class="unit-dot ${cls}">${char}</div><div class="unit-name-txt">${u.name}</div><div class="unit-est-txt">~${u.est}m</div>${asyncBtn}${moveBtns}<button class="unit-del" onclick="delUnit('${sk.id}',${i})" title="Remove">×</button></div>`;
     }).join('');
     const suggestBtn=suggested&&units.length===0?`<button class="add-btn" onclick="loadSuggested('${sk.id}')" style="margin-top:6px">Load suggested units</button>`:'';
     div.innerHTML=`
@@ -1258,6 +1267,21 @@ function addUnit(sid){
   n.value="";e.value="30";
   saveLocal();renderUnits();renderToday();
 }
+function moveUnit(sid,idx,dir){
+  const units=S.skillUnits[sid];
+  if(!units) return;
+  const newIdx=idx+dir;
+  if(newIdx<0||newIdx>=units.length) return;
+  const sp=getSP(sid);
+  // Don't allow moving completed units or swapping across the current index boundary
+  if(idx<sp.currentUnitIndex||newIdx<sp.currentUnitIndex) return;
+  const tmp=units[idx];
+  units[idx]=units[newIdx];
+  units[newIdx]=tmp;
+  save();
+  renderUnits();
+}
+
 function delUnit(sid,idx){
   if(!confirm("Remove unit? Cannot be undone."))return;
   S.skillUnits[sid].splice(idx,1);
