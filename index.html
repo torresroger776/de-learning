@@ -206,7 +206,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14
 <div class="shell">
 <nav class="sidebar">
   <div class="sidebar-logo">
-    <div class="logo-tag">v2.7</div>
+    <div class="logo-tag">v2.6</div>
     <div class="logo-title">DE<br><span class="logo-accent">Learning</span></div>
   </div>
   <div class="nav-section">Daily</div>
@@ -337,7 +337,6 @@ const STEP_META={
 };
 const BOOK_STEPS=["prime","consume","recall","notes"];
 
-
 const DEFAULT_BATCHES=[
   {id:"b_priority",label:"Batch 1",badge:"p",skills:[
     {id:"dbt",name:"dbt",sub:"Modeling, tests, docs, macros, incremental, deployment",resource:"dbt Learn courses",notes:""},
@@ -462,7 +461,7 @@ function freshState(){
   return{
     batches:JSON.parse(JSON.stringify(DEFAULT_BATCHES)),
     activeBatchId:"b_priority",
-    activeBookId:null
+    activeBookId:null,   // kept for backward-compat import, ignored
     reading:{
       books:[],          // [{id, title, author, chapters:[{name,est}]}]
       activeBookId:null, // id of currently active reading book
@@ -514,7 +513,7 @@ function getNextSkillId(){
   const batch=getActiveBatch();
   if(!batch||!batch.skills.length) return null;
   let best=null,bestRatio=Infinity;
-  batch.skills.forEach(sk=>{
+  batch.skills.forEach(function(sk){
     const sp=getSP(sk.id);
     const units=getUnits(sk.id);
     if(units.length===0) return;
@@ -522,7 +521,10 @@ function getNextSkillId(){
     const ratio=(sp.sessionsThisBatch||0)/(sp.priority||1);
     if(ratio<bestRatio){bestRatio=ratio;best=sk.id;}
   });
-  if(!best){const fb=batch.skills.find(sk=>getUnits(sk.id).length>0);if(fb)best=fb.id;}
+  if(!best){
+    const fb=batch.skills.find(function(sk){return getUnits(sk.id).length>0;});
+    if(fb) best=fb.id;
+  }
   return best;
 }
 function checkRollover(){
@@ -545,23 +547,23 @@ function checkRollover(){
 // ─── QUEUE BUILDER ──────────────────────────────────────────────────────────
 function buildQueue(){
   checkRollover();
-  const t=S.today;
-  const tasks=[];
+  var t=S.today;
+  var tasks=[];
 
-  // 1. Overdue spaced recalls — time-bound, always surface first
-  S.spacedRecalls.filter(r=>{
+  // 1. Overdue spaced recalls — time-bound, always first
+  S.spacedRecalls.filter(function(r){
     if(r.done) return false;
     if(t.completedSteps.includes("sr-"+r.id)) return false;
     return new Date(r.dueDate)<=new Date();
-  }).forEach(r=>{
+  }).forEach(function(r){
     tasks.push({id:"sr-"+r.id,kind:"spaced-recall",recall:r,
       title:"Spaced recall: "+r.unitName,
-      desc:"Due "+r.dueDate+" for "+r.skillId+". Without looking at notes, write everything you remember, then check.",
+      desc:"Due "+r.dueDate+" for "+r.skillId+". Write everything you remember without notes, then check.",
       type:"review",mins:10,isFirst:true,
       steps:["Open a blank doc.",
         "Write everything you remember about "+r.unitName+".",
         "Check your original unit note. Mark anything faded.",
-        "If significant fade, re-read key sections only, not the whole unit.",
+        "If significant fade, re-read key sections only.",
         "Mark complete below."],
       ai:"Quiz me on "+r.unitName+" in "+r.skillId+". Ask 3 scenario questions and tell me where my answers fall short.",
       done:false});
@@ -569,30 +571,35 @@ function buildQueue(){
 
   // 2. Carry-forward recall — time-bound
   if(t.pendingRecallWarning&&t.pendingRecallSkillId!=null){
-    const sid=t.pendingRecallSkillId,uidx=t.pendingRecallUnitIndex;
-    const unit=(getUnits(sid)||[])[uidx];
-    const recallKey=sid+"-"+uidx+"-recall";
-    if(unit&&!t.completedSteps.includes(recallKey)){
-      tasks.push({id:"cfr-"+sid+"-"+uidx,kind:"carryforward",skillId:sid,unitIndex:uidx,
-        title:"Recall overdue: "+unit.name,
+    var cfSid=t.pendingRecallSkillId;
+    var cfUidx=t.pendingRecallUnitIndex;
+    var cfUnits=getUnits(cfSid)||[];
+    var cfUnit=cfUnits[cfUidx];
+    var recallKey=cfSid+"-"+cfUidx+"-recall";
+    if(cfUnit&&!t.completedSteps.includes(recallKey)){
+      tasks.push({id:"cfr-"+cfSid+"-"+cfUidx,kind:"carryforward",skillId:cfSid,unitIndex:cfUidx,
+        title:"Recall overdue: "+cfUnit.name,
         desc:"You consumed this unit without recalling. Do this before anything new. Memory decays fast.",
         type:"review",mins:10,isFirst:true,isWarn:true,
         steps:["Close all material.",
-          "Dump everything you remember about "+unit.name+" on a blank doc.",
+          "Blank doc: dump everything you remember about "+cfUnit.name+".",
           "Write: The main thing this taught me is ___.",
           "List every question mark. Reopen and check what you missed.",
           "Mark complete here. This fulfills the Recall step."],
         done:false});
-    } else if(!unit){
-      S.today.pendingRecallWarning=false;S.today.pendingRecallSkillId=null;S.today.pendingRecallUnitIndex=null;saveLocal();
+    } else if(!cfUnit){
+      S.today.pendingRecallWarning=false;
+      S.today.pendingRecallSkillId=null;
+      S.today.pendingRecallUnitIndex=null;
+      saveLocal();
     }
   }
 
   // 3. Next skill by weighted rotation
-  const sid=getNextSkillId();
+  var sid=getNextSkillId();
   if(sid){
-    const sp=getSP(sid);
-    const units=getUnits(sid);
+    var sp=getSP(sid);
+    var units=getUnits(sid);
     if(units.length===0){
       tasks.push({id:"setup-"+sid,kind:"info",
         title:"Add units for "+sid,
@@ -609,7 +616,7 @@ function buildQueue(){
           "Option B: click Close phase and synthesize below."],
         done:false});
     } else if(sp.currentUnitIndex>=units.length&&sp.phaseDone&&!sp.synthesisDone){
-      const synKey=sid+"-synthesis";
+      var synKey=sid+"-synthesis";
       tasks.push({id:synKey,kind:"synthesis",skillId:sid,
         title:"Synthesize: "+sid,
         desc:"Phase closed. Complete the synthesis before moving on or adding more units.",
@@ -622,15 +629,17 @@ function buildQueue(){
         ai:"Here is my synthesis doc for "+sid+": [paste]. Act as a senior data engineer with Snowflake, dbt, and Dagster experience. What am I getting wrong or not yet thinking about?",
         done:t.completedSteps.includes(synKey)});
     } else {
-      const uidx=sp.currentUnitIndex;
-      const unit=units[uidx];
-      const doneSteps=CYCLE_STEPS.filter(s=>t.completedSteps.includes(sid+"-"+uidx+"-"+s));
-      const lastIdx=doneSteps.length>0?CYCLE_STEPS.indexOf(doneSteps[doneSteps.length-1]):-1;
+      var uidx=sp.currentUnitIndex;
+      var unit=units[uidx];
+      var doneSteps=CYCLE_STEPS.filter(function(s){return t.completedSteps.includes(sid+"-"+uidx+"-"+s);});
+      var lastIdx=doneSteps.length>0?CYCLE_STEPS.indexOf(doneSteps[doneSteps.length-1]):-1;
       if(lastIdx<CYCLE_STEPS.length-1){
-        const step=CYCLE_STEPS[lastIdx+1];
-        const sm=STEP_META[step];
-        const key=sid+"-"+uidx+"-"+step;
-        let desc="",steps=[],ai=null;
+        var step=CYCLE_STEPS[lastIdx+1];
+        var sm=STEP_META[step];
+        var key=sid+"-"+uidx+"-"+step;
+        var desc="";
+        var steps=[];
+        var ai=null;
         if(step==="prime"){
           desc="Before opening the material: scan headers and objectives only. Takes 3 to 5 minutes.";
           steps=["Scan the unit title, section headers, and any listed objectives. Do not read content yet.",
@@ -652,7 +661,7 @@ function buildQueue(){
             "List every question mark from your scratch notes.",
             "Reopen material. Check what you missed. Correct your dump."];
         } else if(step==="resolve"){
-          desc:"Work through every question mark from your recall dump.";
+          desc="Work through every question mark from your recall dump.";
           steps=["For each question mark, try to answer from the material first. Allow 2 to 3 minutes each.",
             "For anything still unclear, ask Claude using the prompt below.",
             "Cross off each gap when resolved.",
@@ -683,10 +692,10 @@ function buildQueue(){
   }
 
   // 4. Build session every 4 completed cycles across active batch
-  const activeBatch=getActiveBatch();
-  const totalBatchCycles=activeBatch?activeBatch.skills.reduce((a,sk)=>a+(getSP(sk.id).unitsCompleted||0),0):0;
+  var activeBatch=getActiveBatch();
+  var totalBatchCycles=activeBatch?activeBatch.skills.reduce(function(a,sk){return a+(getSP(sk.id).unitsCompleted||0);},0):0;
   if(totalBatchCycles>0&&totalBatchCycles%4===0){
-    const bKey="build-"+totalBatchCycles;
+    var bKey="build-"+totalBatchCycles;
     if(!t.completedSteps.includes(bKey)){
       tasks.push({id:bKey,kind:"build",skillId:sid||"",
         title:"Build session: practice project",
@@ -702,51 +711,55 @@ function buildQueue(){
   }
 
   // 5. Book chapter every 3 completed cycles
-  const rdg=S.reading||{books:[],activeBookId:null};
-  const rBookId=rdg.activeBookId;
+  var rdg=S.reading||{books:[],activeBookId:null};
+  var rBookId=rdg.activeBookId;
   if(rBookId&&S.sessionCount>0&&S.sessionCount%3===0){
-    const rBook=(rdg.books||[]).find(b=>b.id===rBookId);
+    var rBook=(rdg.books||[]).find(function(b){return b.id===rBookId;});
     if(rBook){
-      if(!S.readingProgress)S.readingProgress={};
-      if(!S.readingProgress[rBookId])S.readingProgress[rBookId]={currentChapterIndex:0,chaptersCompleted:0};
-      const rIdx=S.readingProgress[rBookId].currentChapterIndex;
-      const rChapters=rBook.chapters||[];
+      if(!S.readingProgress) S.readingProgress={};
+      if(!S.readingProgress[rBookId]) S.readingProgress[rBookId]={currentChapterIndex:0,chaptersCompleted:0};
+      var rIdx=S.readingProgress[rBookId].currentChapterIndex;
+      var rChapters=rBook.chapters||[];
       if(rIdx<rChapters.length){
-        const rChap=rChapters[rIdx];
-        const RSTEPS=["prime","consume","recall","notes"];
-        const doneRSteps=RSTEPS.filter(s=>t.completedSteps.includes("reading-"+rBookId+"-"+rIdx+"-"+s));
-        const lastR=doneRSteps.length>0?RSTEPS.indexOf(doneRSteps[doneRSteps.length-1]):-1;
+        var rChap=rChapters[rIdx];
+        var RSTEPS=["prime","consume","recall","notes"];
+        var doneRSteps=RSTEPS.filter(function(s){return t.completedSteps.includes("reading-"+rBookId+"-"+rIdx+"-"+s);});
+        var lastR=doneRSteps.length>0?RSTEPS.indexOf(doneRSteps[doneRSteps.length-1]):-1;
         if(lastR<RSTEPS.length-1){
-          const rStep=RSTEPS[lastR+1];
-          const rKey="reading-"+rBookId+"-"+rIdx+"-"+rStep;
-          const rLabel={prime:"Prime",consume:"Consume",recall:"Recall",notes:"Write note"};
-          const rMins=rStep==="consume"?rChap.est:rStep==="prime"?5:rStep==="recall"?10:15;
+          var rStep=RSTEPS[lastR+1];
+          var rKey="reading-"+rBookId+"-"+rIdx+"-"+rStep;
+          var rLabel={prime:"Prime",consume:"Consume",recall:"Recall",notes:"Write note"};
+          var rMins=rStep==="consume"?rChap.est:rStep==="prime"?5:rStep==="recall"?10:15;
+          var rSteps=rStep==="prime"?
+            ["Scan chapter title and headings only, about 2 minutes.","Write: I expect this chapter to cover ___.","Open the chapter."]:
+            rStep==="consume"?["Read linearly. Flag question marks and exclamation marks. Finish before Recall."]:
+            rStep==="recall"?["Close the book. Recall dump on a blank doc, 5 to 8 minutes. Check what you missed."]:
+            ["Write a brief note: main idea, 1 to 2 concepts in your own words, one work connection."];
           tasks.push({id:rKey,kind:"reading-step",rBookId:rBookId,rIdx:rIdx,step:rStep,
             title:"[Reading] "+rLabel[rStep]+": "+rChap.name,
             desc:rBook.title+(rBook.author?" by "+rBook.author:""),
             type:"book",mins:rMins,isFirst:false,
-            steps:rStep==="prime"?["Scan chapter title and headings only, about 2 minutes.","Write: I expect this chapter to cover ___.","Open the chapter."]:
-                  rStep==="consume"?["Read linearly. Flag question marks and exclamation marks. Finish before Recall."]:
-                  rStep==="recall"?["Close the book. Recall dump on a blank doc, 5 to 8 minutes. Check what you missed."]:
-                  ["Write a brief note: main idea, 1 to 2 concepts in your words, one work connection."],
-            ai:null,done:t.completedSteps.includes(rKey)});
+            steps:rSteps,ai:null,
+            done:t.completedSteps.includes(rKey)});
         }
       }
     }
   }
 
   // 6. Async unit
-  const asyncSid=S.today.asyncSkillId,asyncUidx=S.today.asyncUnitIndex;
+  var asyncSid=S.today.asyncSkillId;
+  var asyncUidx=S.today.asyncUnitIndex;
   if(asyncSid!=null&&asyncUidx!=null){
-    const aUnits=getUnits(asyncSid),aUnit=aUnits[asyncUidx];
+    var aUnits=getUnits(asyncSid);
+    var aUnit=aUnits[asyncUidx];
     if(aUnit){
-      const doneASteps=CYCLE_STEPS.filter(s=>t.completedSteps.includes("async-"+asyncSid+"-"+asyncUidx+"-"+s));
-      const lastA=doneASteps.length>0?CYCLE_STEPS.indexOf(doneASteps[doneASteps.length-1]):-1;
+      var doneASteps=CYCLE_STEPS.filter(function(s){return t.completedSteps.includes("async-"+asyncSid+"-"+asyncUidx+"-"+s);});
+      var lastA=doneASteps.length>0?CYCLE_STEPS.indexOf(doneASteps[doneASteps.length-1]):-1;
       if(lastA<CYCLE_STEPS.length-1){
-        const aStep=CYCLE_STEPS[lastA+1];
-        const asm=STEP_META[aStep];
-        const aKey="async-"+asyncSid+"-"+asyncUidx+"-"+aStep;
-        const aDescs={
+        var aStep=CYCLE_STEPS[lastA+1];
+        var asm=STEP_META[aStep];
+        var aKey="async-"+asyncSid+"-"+asyncUidx+"-"+aStep;
+        var aDescs={
           prime:"Scan headers and objectives only before opening the material.",
           consume:"Work through "+aUnit.name+" completely, approximately "+aUnit.est+" minutes.",
           recall:"Close the material and write everything you remember on a blank doc.",
@@ -824,14 +837,14 @@ function renderToday(){
     </div>`;
   }
 
-  const nextSid=getNextSkillId();
-  const nextUnits=nextSid?getUnits(nextSid):[];
-  const nextSp=nextSid?getSP(nextSid):null;
-  const curUnit=nextSp&&nextUnits[nextSp.currentUnitIndex]?nextUnits[nextSp.currentUnitIndex].name:(nextSp&&nextSp.synthesisDone?"Complete":"—");
-  const dueR=S.spacedRecalls.filter(r=>!r.done&&new Date(r.dueDate)<=new Date()).length;
-  const activeBatch=getActiveBatch();
+  var nextSid=getNextSkillId();
+  var nextUnits=nextSid?getUnits(nextSid):[];
+  var nextSp=nextSid?getSP(nextSid):null;
+  var curUnit=nextSp&&nextUnits[nextSp.currentUnitIndex]?nextUnits[nextSp.currentUnitIndex].name:(nextSp&&nextSp.synthesisDone?"Complete":"—");
+  var dueR=S.spacedRecalls.filter(function(r){return !r.done&&new Date(r.dueDate)<=new Date();}).length;
+  var activeBatch=getActiveBatch();
 
-  let html=`<div class="prog-track"><div class="prog-fill" style="width:${pct}%"></div></div>`;
+  var html=`<div class="prog-track"><div class="prog-fill" style="width:${pct}%"></div></div>`;
   html+=`<div class="info-bar">
     <div class="ib-item"><div class="ib-label">active batch</div><div class="ib-val ib-accent">${activeBatch?activeBatch.label:"—"}</div></div>
     <div class="ib-item"><div class="ib-label">next skill</div><div class="ib-val">${nextSid||"—"}</div></div>
@@ -969,8 +982,8 @@ function scheduleRecalls(skillId,unitIndex){
 
 function skipUnit(){
   if(!confirm("Skip current unit? Learning cycle won't be complete."))return;
-  const sid=getNextSkillId();if(!sid)return;
-  const sp=getSP(sid);
+  var sid=getNextSkillId();if(!sid)return;
+  var sp=getSP(sid);
   sp.currentUnitIndex++;
   S.today.pendingRecallWarning=false;S.today.pendingRecallSkillId=null;S.today.pendingRecallUnitIndex=null;
   saveLocal(); renderToday();
@@ -1046,8 +1059,8 @@ function renderSkillsBatch(bi){
 }
 
 function setPriority(skillId,val){
-  const sp=getSP(skillId);sp.priority=parseInt(val);
-  const el=document.getElementById("pri-"+skillId);if(el)el.textContent=val;
+  var sp=getSP(skillId);sp.priority=parseInt(val);
+  var el=document.getElementById("pri-"+skillId);if(el)el.textContent=val;
   save();
 }
 function setActive(id){S.activeSkillId=id;S.today.pendingRecallWarning=false;S.today.pendingRecallSkillId=null;S.today.pendingRecallUnitIndex=null;saveLocal();renderSkillsAll();renderToday();}
