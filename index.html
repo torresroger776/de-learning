@@ -206,11 +206,11 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14
 <div class="shell">
 <nav class="sidebar">
   <div class="sidebar-logo">
-    <div class="logo-tag">v2.6</div>
+    <div class="logo-tag">v2.7</div>
     <div class="logo-title">DE<br><span class="logo-accent">Learning</span></div>
   </div>
   <div class="nav-section">Daily</div>
-  <div class="nav-item active" onclick="go('today',this)"><span class="nav-icon">◈</span>Today</div>
+  <div class="nav-item active" onclick="go('today',this)"><span class="nav-icon">◈</span>Up Next</div>
   <div class="nav-section">Manage</div>
   <div class="nav-item" onclick="go('skills',this)"><span class="nav-icon">⊞</span>Skills</div>
   <div class="nav-item" onclick="go('units',this)"><span class="nav-icon">≡</span>Units</div>
@@ -229,7 +229,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14
 </div>
 
 <div class="page active" id="page-today">
-  <div class="page-header"><div class="page-title">Today</div><div class="page-sub" id="today-date"></div></div>
+  <div class="page-header"><div class="page-title">Up Next</div><div class="page-sub" id="today-date"></div></div>
   <div id="today-content"></div>
 </div>
 
@@ -337,31 +337,31 @@ const STEP_META={
 };
 const BOOK_STEPS=["prime","consume","recall","notes"];
 
+
 const DEFAULT_BATCHES=[
-  {id:"b_priority",label:"Priority — work objectives",badge:"p",skills:[
-    {id:"dbt",name:"dbt",sub:"Modeling, tests, docs, macros, incremental, deployment — convert pipeline to dbt DAG",resource:"dbt Learn courses",notes:""},
-    {id:"azdevops",name:"Azure DevOps + CI/CD",sub:"Azure Pipelines, YAML, environments, approvals — CI/CD for dbt pipeline",resource:"Microsoft Learn: Azure DevOps",notes:""},
-    {id:"claudeai",name:"Agentic coding & LLM workflows",sub:"Claude Code, prompt engineering, AI-assisted development, productive LLM use",resource:"Anthropic docs + Claude Code + hands-on",notes:""},
-    {id:"semanticlayer",name:"Semantic layer & AI-ready data",sub:"dbt semantic layer / MetricFlow, mart design for agent consumption, exposures, contracts",resource:"dbt docs: semantic layer + MetricFlow docs",notes:""}
+  {id:"b_priority",label:"Batch 1",badge:"p",skills:[
+    {id:"dbt",name:"dbt",sub:"Modeling, tests, docs, macros, incremental, deployment",resource:"dbt Learn courses",notes:""},
+    {id:"azdevops",name:"Azure DevOps + CI/CD",sub:"Azure Pipelines, YAML, environments, approvals",resource:"Microsoft Learn: Azure DevOps",notes:""},
+    {id:"claudeai",name:"Agentic coding & LLM workflows",sub:"Claude Code, prompt engineering, AI-assisted development",resource:"Anthropic docs + Claude Code",notes:""}
   ]},
-  {id:"b0",label:"Batch 1 — core skills",badge:"a",skills:[
+  {id:"b0",label:"Batch 2",badge:"a",skills:[
     {id:"sql",name:"SQL",sub:"Window functions, CTEs, optimization, Snowflake SQL",resource:"Mode SQL tutorial + Snowflake docs",notes:""},
-    {id:"git",name:"Git",sub:"Branching, PRs, rebase, team workflows",resource:"Pro Git (progit.org — free)",notes:""},
+    {id:"git",name:"Git",sub:"Branching, PRs, rebase, team workflows",resource:"Pro Git (progit.org)",notes:""},
     {id:"python",name:"Python for DE",sub:"Pandas, file I/O, API calls, pytest, packaging",resource:"Effective Python (Slatkin)",notes:""},
     {id:"snowflake",name:"Snowflake",sub:"Architecture, virtual warehouses, RBAC, cost optimization",resource:"Snowflake University",notes:""},
     {id:"terraform",name:"Terraform",sub:"IaC, Snowflake provider, state management, modules",resource:"HashiCorp Learn",notes:""},
     {id:"datamodel",name:"Data modeling & warehousing",sub:"Kimball, dimensional modeling, star schemas, SCDs",resource:"The Data Warehouse Toolkit",notes:""},
     {id:"agile",name:"Agile methodology",sub:"Scrum, Kanban, ceremonies, backlog, estimation",resource:"Scrum Guide + Atlassian",notes:""}
   ]},
-  {id:"b1",label:"Batch 2 — next up",badge:"n",skills:[
+  {id:"b1",label:"Batch 3",badge:"n",skills:[
     {id:"dagster",name:"Dagster",sub:"Assets, jobs, resources, sensors, schedules, partitions",resource:"Dagster docs + dagster-university",notes:""},
     {id:"docker",name:"Docker",sub:"Images, containers, Compose, registries",resource:"Docker docs",notes:""},
     {id:"observability",name:"Observability & monitoring",sub:"dbt tests, Elementary, alerting, freshness",resource:"Elementary docs",notes:""},
     {id:"dq",name:"Data quality",sub:"Great Expectations, Soda, expectation suites",resource:"GX docs",notes:""},
-    {id:"aiagents",name:"AI agents & LLM tooling",sub:"Agentic workflows, RAG, tool use, LangChain basics",resource:"Anthropic cookbook",notes:""},
+    {id:"aiagents",name:"AI agents & LLM tooling",sub:"Agentic workflows, RAG, tool use",resource:"Anthropic cookbook",notes:""},
     {id:"lineage",name:"Data lineage & governance",sub:"Column-level lineage, catalogs, access control",resource:"OpenMetadata docs",notes:""}
   ]},
-  {id:"b2",label:"Batch 3 — horizon",badge:"l",skills:[
+  {id:"b2",label:"Batch 4",badge:"l",skills:[
     {id:"spark",name:"Apache Spark",sub:"RDDs, DataFrames, PySpark, Spark SQL",resource:"Learning Spark (O'Reilly)",notes:""},
     {id:"kafka",name:"Kafka & streaming",sub:"Topics, consumers, producers, stream processing",resource:"Confluent courses",notes:""},
     {id:"bigdata",name:"Big data fundamentals",sub:"Distributed systems, storage formats, ecosystem",resource:"Fundamentals of Data Engineering",notes:""},
@@ -461,8 +461,8 @@ const SUGGESTED_UNITS={
 function freshState(){
   return{
     batches:JSON.parse(JSON.stringify(DEFAULT_BATCHES)),
-    activeSkillId:"dbt",
-    activeBookId:null,   // kept for backward-compat import, ignored
+    activeBatchId:"b_priority",
+    activeBookId:null
     reading:{
       books:[],          // [{id, title, author, chapters:[{name,est}]}]
       activeBookId:null, // id of currently active reading book
@@ -484,7 +484,7 @@ function freshState(){
 }
 
 function initSP(skillId){
-  return{currentUnitIndex:0,unitsCompleted:0,stageOrient:false,stageApply:false,stageConsolidate:false,synthesisDone:false,phaseDone:false,cyclesCompleted:[]};
+  return{currentUnitIndex:0,unitsCompleted:0,stageOrient:false,stageApply:false,stageConsolidate:false,synthesisDone:false,phaseDone:false,cyclesCompleted:[],priority:3,sessionsThisBatch:0};
 }
 
 function getSP(sid){
@@ -507,6 +507,24 @@ function save(){
 
 function todayStr(){return new Date().toDateString();}
 
+function getActiveBatch(){
+  return S.batches.find(b=>b.badge==='p')||S.batches[0];
+}
+function getNextSkillId(){
+  const batch=getActiveBatch();
+  if(!batch||!batch.skills.length) return null;
+  let best=null,bestRatio=Infinity;
+  batch.skills.forEach(sk=>{
+    const sp=getSP(sk.id);
+    const units=getUnits(sk.id);
+    if(units.length===0) return;
+    if(sp.currentUnitIndex>=units.length&&!sp.phaseDone&&!sp.synthesisDone) return;
+    const ratio=(sp.sessionsThisBatch||0)/(sp.priority||1);
+    if(ratio<bestRatio){bestRatio=ratio;best=sk.id;}
+  });
+  if(!best){const fb=batch.skills.find(sk=>getUnits(sk.id).length>0);if(fb)best=fb.id;}
+  return best;
+}
 function checkRollover(){
   if(S.today.date!==todayStr()){
     S.today={
@@ -530,176 +548,169 @@ function buildQueue(){
   const t=S.today;
   const tasks=[];
 
-  // 1. Overdue spaced recalls
+  // 1. Overdue spaced recalls — time-bound, always surface first
   S.spacedRecalls.filter(r=>{
     if(r.done) return false;
     if(t.completedSteps.includes("sr-"+r.id)) return false;
     return new Date(r.dueDate)<=new Date();
   }).forEach(r=>{
-    tasks.push({
-      id:"sr-"+r.id, kind:"spaced-recall", recall:r,
+    tasks.push({id:"sr-"+r.id,kind:"spaced-recall",recall:r,
       title:"Spaced recall: "+r.unitName,
-      desc:"Recall check for "+r.skillId+" (scheduled from "+r.dueDate+"). Without notes: write everything you remember, then check.",
+      desc:"Due "+r.dueDate+" for "+r.skillId+". Without looking at notes, write everything you remember, then check.",
       type:"review",mins:10,isFirst:true,
-      steps:[
-        "Open a blank doc.",
-        "Write everything you remember about '"+r.unitName+"'.",
+      steps:["Open a blank doc.",
+        "Write everything you remember about "+r.unitName+".",
         "Check your original unit note. Mark anything faded.",
-        "If significant fade: re-read key sections only — not the whole unit.",
-        "Mark complete below."
-      ],
-      ai:"Quiz me on '"+r.unitName+"' in "+r.skillId+". Ask 3 scenario questions I should be able to answer. Tell me where my answers fall short.",
-      done:false
-    });
+        "If significant fade, re-read key sections only, not the whole unit.",
+        "Mark complete below."],
+      ai:"Quiz me on "+r.unitName+" in "+r.skillId+". Ask 3 scenario questions and tell me where my answers fall short.",
+      done:false});
   });
 
-  // 2. Carry-forward recall warning
+  // 2. Carry-forward recall — time-bound
   if(t.pendingRecallWarning&&t.pendingRecallSkillId!=null){
-    const sid=t.pendingRecallSkillId, uidx=t.pendingRecallUnitIndex;
-    const units=getUnits(sid);
-    const unit=units[uidx];
+    const sid=t.pendingRecallSkillId,uidx=t.pendingRecallUnitIndex;
+    const unit=(getUnits(sid)||[])[uidx];
     const recallKey=sid+"-"+uidx+"-recall";
     if(unit&&!t.completedSteps.includes(recallKey)){
-      tasks.push({
-        id:"cfr-"+sid+"-"+uidx, kind:"carryforward",
-        skillId:sid, unitIndex:uidx,
-        title:"⚠ Recall overdue: "+unit.name,
-        desc:"You consumed this unit but haven't recalled yet. Do this before anything new — memory decays fast.",
+      tasks.push({id:"cfr-"+sid+"-"+uidx,kind:"carryforward",skillId:sid,unitIndex:uidx,
+        title:"Recall overdue: "+unit.name,
+        desc:"You consumed this unit without recalling. Do this before anything new. Memory decays fast.",
         type:"review",mins:10,isFirst:true,isWarn:true,
-        steps:[
-          "Close all course/docs material.",
-          "Blank doc: dump everything you remember about '"+unit.name+"'.",
-          "Write: 'The main thing this taught me is ___.'",
-          "List every '?' from your scratch notes.",
-          "Reopen material. Check what you missed. Correct your dump.",
-          "Mark complete below — this fulfills the Recall step."
-        ],
-        done:false
-      });
+        steps:["Close all material.",
+          "Dump everything you remember about "+unit.name+" on a blank doc.",
+          "Write: The main thing this taught me is ___.",
+          "List every question mark. Reopen and check what you missed.",
+          "Mark complete here. This fulfills the Recall step."],
+        done:false});
     } else if(!unit){
-      S.today.pendingRecallWarning=false;
-      S.today.pendingRecallSkillId=null;
-      S.today.pendingRecallUnitIndex=null;
-      saveLocal();
+      S.today.pendingRecallWarning=false;S.today.pendingRecallSkillId=null;S.today.pendingRecallUnitIndex=null;saveLocal();
     }
   }
 
-  // 3. Active skill: next step in current cycle
-  const sid=S.activeSkillId;
-  const sp=getSP(sid);
-  const units=getUnits(sid);
-
-  if(units.length===0){
-    tasks.push({id:"setup-"+sid,kind:"info",title:"Add units for "+sid,desc:"Go to the Units tab to add your course sections or chapters for this skill.",type:"plan",mins:5,isFirst:true,steps:["Go to Units tab → find "+sid+" → add units using the + add unit button."],done:false});
-  } else if(sp.currentUnitIndex>=units.length&&sp.phaseDone&&!sp.synthesisDone){
-    // Phase manually closed — show synthesis task
-    const synKey=sid+"-synthesis";
-    tasks.push({
-      id:synKey,kind:"synthesis",skillId:sid,
-      title:"Synthesize: "+sid+" — phase complete",
-      desc:"You closed this phase. Complete the synthesis before moving on or adding the next batch of units.",
-      type:"notes",mins:45,isFirst:true,
-      steps:[
-        "Without notes: write what "+sid+" is, its top 3 concepts, one mistake you almost made, what to learn next.",
-        "Check your unit notes and complete your skill synthesis doc.",
-        "Paste synthesis to Claude and ask for senior engineer review (use prompt below).",
-        "Build one final project connecting "+sid+" to your actual job. Commit to GitHub with README.",
-        "Mark complete below. You can then add more units to continue, or set a new skill as active."
-      ],
-      ai:"Here is my synthesis doc for "+sid+": [paste]. Act as a senior data engineer with production Snowflake + dbt + Dagster experience. What am I getting wrong or not yet thinking about?",
-      done:t.completedSteps.includes(synKey)
-    });
-  } else if(sp.currentUnitIndex>=units.length&&!sp.phaseDone&&!sp.synthesisDone){
-    // Units exhausted but phase not closed — ask what to do
-    tasks.push({
-      id:"phase-decision-"+sid,kind:"phase-decision",skillId:sid,
-      title:"All current units done for "+sid,
-      desc:"You've finished every unit added so far. Are you done with this phase, or do you want to continue with more material?",
-      type:"plan",mins:5,isFirst:true,
-      steps:[
-        "Option A — Add more units: go to the Units tab, add the next course or chapters, and continue the cycle.",
-        "Option B — Close this phase: click 'Close phase & synthesize' below. This triggers the synthesis task and locks in what you've learned so far.",
-        "You can always add more units and open a new phase after synthesizing."
-      ],
-      done:false
-    });
-  } else if(sp.currentUnitIndex<units.length){
-    const uidx=sp.currentUnitIndex;
-    const unit=units[uidx];
-    // Find next step
-    const doneSteps=CYCLE_STEPS.filter(s=>t.completedSteps.includes(sid+"-"+uidx+"-"+s));
-    const lastIdx=doneSteps.length>0?CYCLE_STEPS.indexOf(doneSteps[doneSteps.length-1]):-1;
-
-    if(lastIdx<CYCLE_STEPS.length-1){
-      const step=CYCLE_STEPS[lastIdx+1];
-      const sm=STEP_META[step];
-      const mins=sm.mins||unit.est;
-      const key=sid+"-"+uidx+"-"+step;
-
-      let desc="",steps=[],ai=null;
-      if(step==="prime"){
-        desc="Before opening the material: scan headers/objectives only (3–5 min). Sets context before you consume.";
-        steps=["Scan the unit title, section headers, and any listed objectives. Do not read content yet.","Write one sentence: 'After this unit I expect to understand ___.'","If not your first unit in "+sid+": 60 seconds recalling what the previous unit covered.","Then open the material and move to Consume."];
-        ai="I'm about to start '"+unit.name+"' in "+sid+". In 2–3 sentences, what am I about to learn and what typically trips up beginners?";
-      }else if(step==="consume"){
-        desc="Work through '"+unit.name+"' completely (~"+unit.est+" min). Do not stop mid-unit.";
-        steps=["Work through the unit linearly from start to finish.","Do any included exercises as you encounter them.","Flag '?' for confusion and '!' for surprises in a scratch doc. Keep moving.","Finish the unit completely before moving to Recall."];
-      }else if(step==="recall"){
-        desc="Close the material now. Write everything you remember. This step is where learning sticks — never skip it.";
-        steps=["Close or minimize all course/docs material — do not look at it.","On a blank doc: dump everything you remember from '"+unit.name+"'. Bullets, fragments, anything.","Write: 'The main thing this taught me is ___.' (one sentence, forced)","List every '?' from your scratch notes.","Only now: reopen the material. Check what you missed. Correct your dump."];
-      }else if(step==="resolve"){
-        desc="Work through every '?' from your recall dump. Use Claude for anything still unresolved after 2–3 min of effort.";
-        steps=["Open your recall dump.","For each '?': try to answer it from the material first (2–3 min each).","For anything still unclear: ask Claude (copy prompt below).","Cross off each gap when resolved.","Mark any 'rabbit holes' separately — don't let them block the cycle."];
-        ai="I just finished '"+unit.name+"' in "+sid+". My open questions: [paste list]. Answer each concisely and flag any that will cause real problems going forward.";
-      }else if(step==="apply"){
-        desc="Build something using what you just learned. Same day as consumption — don't let a day pass.";
-        steps=["If course has an exercise: do it, then change or extend one thing.","If no exercise: build a minimal reproduction in your environment (Snowflake/dbt/Python).","If too abstract: write exactly how this concept would appear in your actual job — specific, not vague.","Note any new questions — add to your gaps list."];
-        ai="I just learned '"+unit.name+"' from "+sid+". Give me one minimal concrete exercise I can do right now in Snowflake/dbt/Python that forces me to use this concept.";
-      }else if(step==="notes"){
-        desc="Write your permanent synthesis note. Your own words only — no copy-pasting. Completing this schedules your spaced recalls.";
-        steps=["Open your DE knowledge base file for "+sid+".","Write a dated entry: main idea (1 sentence in your words), key concepts in your words, gotchas.","Add: 'Work connection: how could I apply this at my job?' Be specific.","Mark any still-open questions for a later session.","Mark complete below — spaced recall checks will be scheduled automatically at +3, +7, +21 days."];
+  // 3. Next skill by weighted rotation
+  const sid=getNextSkillId();
+  if(sid){
+    const sp=getSP(sid);
+    const units=getUnits(sid);
+    if(units.length===0){
+      tasks.push({id:"setup-"+sid,kind:"info",
+        title:"Add units for "+sid,
+        desc:"Go to the Units tab to add course sections or chapters for this skill.",
+        type:"plan",mins:5,isFirst:true,
+        steps:["Go to Units tab, find "+sid+", and add units using the add unit button."],
+        done:false});
+    } else if(sp.currentUnitIndex>=units.length&&!sp.phaseDone&&!sp.synthesisDone){
+      tasks.push({id:sid+"-phasedecision",kind:"phase-decision",skillId:sid,
+        title:"All current units done for "+sid,
+        desc:"Finished every unit added so far. Add more material or close this phase.",
+        type:"plan",mins:5,isFirst:true,
+        steps:["Option A: go to Units tab, add the next course or chapters, and continue.",
+          "Option B: click Close phase and synthesize below."],
+        done:false});
+    } else if(sp.currentUnitIndex>=units.length&&sp.phaseDone&&!sp.synthesisDone){
+      const synKey=sid+"-synthesis";
+      tasks.push({id:synKey,kind:"synthesis",skillId:sid,
+        title:"Synthesize: "+sid,
+        desc:"Phase closed. Complete the synthesis before moving on or adding more units.",
+        type:"notes",mins:45,isFirst:true,
+        steps:["Without notes: write what "+sid+" is, the top 3 concepts, one mistake you almost made, and what to learn next.",
+          "Check your unit notes and complete your skill synthesis doc.",
+          "Paste synthesis to Claude and ask for a senior engineer review using the prompt below.",
+          "Build one final project connecting "+sid+" to your actual job and commit to GitHub with a README.",
+          "Mark complete below."],
+        ai:"Here is my synthesis doc for "+sid+": [paste]. Act as a senior data engineer with Snowflake, dbt, and Dagster experience. What am I getting wrong or not yet thinking about?",
+        done:t.completedSteps.includes(synKey)});
+    } else {
+      const uidx=sp.currentUnitIndex;
+      const unit=units[uidx];
+      const doneSteps=CYCLE_STEPS.filter(s=>t.completedSteps.includes(sid+"-"+uidx+"-"+s));
+      const lastIdx=doneSteps.length>0?CYCLE_STEPS.indexOf(doneSteps[doneSteps.length-1]):-1;
+      if(lastIdx<CYCLE_STEPS.length-1){
+        const step=CYCLE_STEPS[lastIdx+1];
+        const sm=STEP_META[step];
+        const key=sid+"-"+uidx+"-"+step;
+        let desc="",steps=[],ai=null;
+        if(step==="prime"){
+          desc="Before opening the material: scan headers and objectives only. Takes 3 to 5 minutes.";
+          steps=["Scan the unit title, section headers, and any listed objectives. Do not read content yet.",
+            "Write one sentence: After this unit I expect to understand ___.",
+            "If not your first unit in "+sid+", spend 60 seconds recalling the previous unit.",
+            "Open the material and move to Consume."];
+          ai="I am about to start "+unit.name+" in "+sid+". In 2 to 3 sentences, what am I about to learn and what typically trips up beginners?";
+        } else if(step==="consume"){
+          desc="Work through "+unit.name+" completely. Estimated "+unit.est+" minutes. Do not stop mid-unit.";
+          steps=["Work through the unit linearly from start to finish.",
+            "Do any included exercises as you encounter them.",
+            "Flag question marks for confusion and exclamation marks for surprises in a scratch doc. Keep moving.",
+            "Finish completely before moving to Recall."];
+        } else if(step==="recall"){
+          desc="Close the material now and write everything you remember. This is where learning sticks. Never skip.";
+          steps=["Close or minimize all course and docs material.",
+            "Dump everything you remember on a blank doc. Bullets, fragments, anything.",
+            "Write: The main thing this taught me is ___. Force one sentence.",
+            "List every question mark from your scratch notes.",
+            "Reopen material. Check what you missed. Correct your dump."];
+        } else if(step==="resolve"){
+          desc:"Work through every question mark from your recall dump.";
+          steps=["For each question mark, try to answer from the material first. Allow 2 to 3 minutes each.",
+            "For anything still unclear, ask Claude using the prompt below.",
+            "Cross off each gap when resolved.",
+            "Mark rabbit holes separately so they do not block the cycle."];
+          ai="I just finished "+unit.name+" in "+sid+". My open questions: [paste list]. Answer each concisely and flag any that will cause real problems going forward.";
+        } else if(step==="apply"){
+          desc="Build something using what you just learned. Do this before moving on.";
+          steps=["If the course has an exercise, do it then change or extend one thing.",
+            "If no exercise, build a minimal reproduction in your environment.",
+            "If too abstract, write exactly how this concept appears in your actual job. Be specific.",
+            "Note any new questions and add them to your gaps list."];
+          ai="I just learned "+unit.name+" from "+sid+". Give me one minimal concrete exercise I can do right now in Snowflake, dbt, or Python that forces me to use this concept.";
+        } else if(step==="notes"){
+          desc="Write your permanent unit note in your own words. Completing this step schedules spaced recalls.";
+          steps=["Open your DE knowledge base file for "+sid+".",
+            "Write a dated entry: main idea in one sentence, key concepts in your words, gotchas, resolved gaps.",
+            "Add a work connection: how could I apply this at my job? Be specific.",
+            "Mark any still-open questions for a later session.",
+            "Mark complete below. Spaced recall checks will be scheduled at 3, 7, and 21 days."];
+        }
+        tasks.push({id:key,kind:"cycle-step",skillId:sid,unitIndex:uidx,step:step,
+          title:sm.label+": "+unit.name+" ["+sid+"]",
+          desc:desc,type:sm.type,mins:sm.mins||unit.est,
+          isFirst:sm.isFirst||false,steps:steps,ai:ai,
+          done:t.completedSteps.includes(key)});
       }
-
-      tasks.push({
-        id:key,kind:"cycle-step",skillId:sid,unitIndex:uidx,step,
-        title:sm.label+": "+unit.name,
-        desc,type:sm.type,mins,
-        isFirst:sm.isFirst||false,
-        steps,ai,
-        done:t.completedSteps.includes(key)
-      });
     }
-    // If all steps done for this unit, queue auto-refreshes with next unit's prime (handled by render cycle)
   }
 
-  // 4. Build session every 4 completed cycles
-  const totalCycles=Object.values(S.skillProgress).reduce((a,sp)=>a+(sp.unitsCompleted||0),0);
-  if(totalCycles>0&&totalCycles%4===0){
-    const bKey="build-"+totalCycles;
+  // 4. Build session every 4 completed cycles across active batch
+  const activeBatch=getActiveBatch();
+  const totalBatchCycles=activeBatch?activeBatch.skills.reduce((a,sk)=>a+(getSP(sk.id).unitsCompleted||0),0):0;
+  if(totalBatchCycles>0&&totalBatchCycles%4===0){
+    const bKey="build-"+totalBatchCycles;
     if(!t.completedSteps.includes(bKey)){
-      tasks.push({
-        id:bKey,kind:"build",skillId:sid,
+      tasks.push({id:bKey,kind:"build",skillId:sid||"",
         title:"Build session: practice project",
-        desc:"Time to build something real. Pick one specific task to complete. Commit to GitHub.",
+        desc:"Time to build something real from your current batch work.",
         type:"build",mins:45,
-        steps:["Write the ONE specific thing you will finish today before starting.","Build it. If stuck 20+ min: describe the problem in writing first, then ask Claude.","Commit to GitHub (even WIP).","Write one sentence in your project log: what you built and what's next."],
-        ai:"I'm building a practice project for "+sid+" and stuck on [problem]. I've tried [X and Y]. What should I try next?",
-        done:t.completedSteps.includes(bKey)
-      });
+        steps:["Write the one specific thing you will finish today before starting.",
+          "Build it. If stuck for more than 20 minutes, describe the problem in writing first then ask Claude.",
+          "Commit to GitHub, even a WIP commit.",
+          "Write one sentence in your project log: what you built and what is next."],
+        ai:"I am building a practice project and stuck on [problem]. I have tried [X and Y]. What should I try next?",
+        done:t.completedSteps.includes(bKey)});
     }
   }
 
-  // 5. Reading book chapter every 3 completed sessions
+  // 5. Book chapter every 3 completed cycles
   const rdg=S.reading||{books:[],activeBookId:null};
   const rBookId=rdg.activeBookId;
   if(rBookId&&S.sessionCount>0&&S.sessionCount%3===0){
-    const rBook=rdg.books.find(b=>b.id===rBookId);
+    const rBook=(rdg.books||[]).find(b=>b.id===rBookId);
     if(rBook){
+      if(!S.readingProgress)S.readingProgress={};
+      if(!S.readingProgress[rBookId])S.readingProgress[rBookId]={currentChapterIndex:0,chaptersCompleted:0};
+      const rIdx=S.readingProgress[rBookId].currentChapterIndex;
       const rChapters=rBook.chapters||[];
-      const rProgress=S.readingProgress||{};
-      if(!rProgress[rBookId])rProgress[rBookId]={currentChapterIndex:0,chaptersCompleted:0};
-      S.readingProgress=rProgress;
-      const rIdx=rProgress[rBookId].currentChapterIndex;
       if(rIdx<rChapters.length){
         const rChap=rChapters[rIdx];
         const RSTEPS=["prime","consume","recall","notes"];
@@ -708,84 +719,46 @@ function buildQueue(){
         if(lastR<RSTEPS.length-1){
           const rStep=RSTEPS[lastR+1];
           const rKey="reading-"+rBookId+"-"+rIdx+"-"+rStep;
-          const rMins=rStep==="consume"?rChap.est:rStep==="prime"?5:rStep==="recall"?10:15;
           const rLabel={prime:"Prime",consume:"Consume",recall:"Recall",notes:"Write note"};
-          const rSteps=rStep==="prime"?
-            ["Scan chapter title and section headings only (2–3 min).","Write: 'I expect this chapter to cover ___.'","Open the chapter — begin Consume."]:
-            rStep==="consume"?
-            ["Read '"+rChap.name+"' linearly from start to finish.","Flag '?' for confusion and '!' for surprises in a scratch doc.","Finish the chapter before moving to Recall."]:
-            rStep==="recall"?
-            ["Close the book.","Recall dump on a blank doc: everything you remember (5–8 min).","Write: 'The main thing this chapter taught me is ___.'","Check what you missed."]:
-            ["Write a brief note: main idea, 1–2 concepts in your own words, one connection to your work.","Do not copy-paste — paraphrase everything."];
-          tasks.push({
-            id:rKey,kind:"reading-step",rBookId,rIdx,step:rStep,
+          const rMins=rStep==="consume"?rChap.est:rStep==="prime"?5:rStep==="recall"?10:15;
+          tasks.push({id:rKey,kind:"reading-step",rBookId:rBookId,rIdx:rIdx,step:rStep,
             title:"[Reading] "+rLabel[rStep]+": "+rChap.name,
-            desc:rBook.title+(rBook.author?" — "+rBook.author:""),
+            desc:rBook.title+(rBook.author?" by "+rBook.author:""),
             type:"book",mins:rMins,isFirst:false,
-            steps:rSteps,ai:null,
-            done:t.completedSteps.includes(rKey)
-          });
+            steps:rStep==="prime"?["Scan chapter title and headings only, about 2 minutes.","Write: I expect this chapter to cover ___.","Open the chapter."]:
+                  rStep==="consume"?["Read linearly. Flag question marks and exclamation marks. Finish before Recall."]:
+                  rStep==="recall"?["Close the book. Recall dump on a blank doc, 5 to 8 minutes. Check what you missed."]:
+                  ["Write a brief note: main idea, 1 to 2 concepts in your words, one work connection."],
+            ai:null,done:t.completedSteps.includes(rKey)});
         }
-      } else {
-        // Book complete
-        tasks.push({
-          id:"reading-done-"+rBookId,kind:"info",
-          title:"[Reading] "+rBook.title+" — complete!",
-          desc:"You've finished all chapters. Go to Reading to start a new book.",
-          type:"book",mins:5,isFirst:false,steps:[],done:false
-        });
       }
     }
   }
 
-  // 6. Async unit for today (set via Units tab)
-  const asyncSid=S.today.asyncSkillId;
-  const asyncUidx=S.today.asyncUnitIndex;
+  // 6. Async unit
+  const asyncSid=S.today.asyncSkillId,asyncUidx=S.today.asyncUnitIndex;
   if(asyncSid!=null&&asyncUidx!=null){
-    const aUnits=getUnits(asyncSid);
-    const aUnit=aUnits[asyncUidx];
+    const aUnits=getUnits(asyncSid),aUnit=aUnits[asyncUidx];
     if(aUnit){
       const doneASteps=CYCLE_STEPS.filter(s=>t.completedSteps.includes("async-"+asyncSid+"-"+asyncUidx+"-"+s));
       const lastA=doneASteps.length>0?CYCLE_STEPS.indexOf(doneASteps[doneASteps.length-1]):-1;
       if(lastA<CYCLE_STEPS.length-1){
         const aStep=CYCLE_STEPS[lastA+1];
         const asm=STEP_META[aStep];
-        const aMins=asm.mins||aUnit.est;
         const aKey="async-"+asyncSid+"-"+asyncUidx+"-"+aStep;
-        let aDesc="",aSteps=[],aAi=null;
-        if(aStep==="prime"){
-          aDesc="Async — before opening: scan headers/objectives only (3–5 min).";
-          aSteps=["Scan the unit title and headers. Do not read content yet.","Write: 'After this unit I expect to understand ___.'","Open the material and move to Consume."];
-          aAi="I'm about to start '"+aUnit.name+"' in "+asyncSid+". In 2–3 sentences, what am I about to learn and what typically trips up beginners?";
-        }else if(aStep==="consume"){
-          aDesc="Work through '"+aUnit.name+"' (~"+aUnit.est+" min). Do not stop mid-unit.";
-          aSteps=["Work through the unit linearly.","Do any included exercises.","Flag '?' and '!' in a scratch doc. Keep moving.","Finish completely before Recall."];
-        }else if(aStep==="recall"){
-          aDesc="Close the material. Write everything you remember. Do not skip.";
-          aSteps=["Close all material.","Dump everything you remember on a blank doc.","Write: 'The main thing this taught me is ___.'","List every '?'.","Reopen and check what you missed."];
-        }else if(aStep==="resolve"){
-          aDesc="Work through every '?' from your recall dump.";
-          aSteps=["For each '?': try yourself first (2–3 min).","Use Claude for anything unresolved.","Cross off each gap when done."];
-          aAi="I just finished '"+aUnit.name+"' in "+asyncSid+". My open questions: [paste list]. Answer each concisely.";
-        }else if(aStep==="apply"){
-          aDesc="Build something using what you just learned — same day.";
-          aSteps=["Course exercise? Do it, then extend it.","No exercise? Minimal reproduction in your environment.","Too abstract? Write exactly how this appears in your actual job."];
-          aAi="I just learned '"+aUnit.name+"' from "+asyncSid+". Give me one minimal concrete exercise I can do right now in Snowflake/dbt/Python.";
-        }else if(aStep==="notes"){
-          aDesc="Write your permanent unit note. Your own words only. Completing this schedules spaced recalls.";
-          aSteps=["Open your DE knowledge base file for "+asyncSid+".","Write: main idea, key concepts in your words, gotchas, work connection.","Mark complete below — spaced recalls scheduled at +3, +7, +21 days."];
-        }
-        tasks.push({
-          id:aKey,kind:"async-step",
-          skillId:asyncSid,unitIndex:asyncUidx,step:aStep,
+        const aDescs={
+          prime:"Scan headers and objectives only before opening the material.",
+          consume:"Work through "+aUnit.name+" completely, approximately "+aUnit.est+" minutes.",
+          recall:"Close the material and write everything you remember on a blank doc.",
+          resolve:"Work through every question mark from your recall dump.",
+          apply:"Build something using what you just learned.",
+          notes:"Write your permanent unit note. Completing this schedules spaced recalls."
+        };
+        tasks.push({id:aKey,kind:"async-step",skillId:asyncSid,unitIndex:asyncUidx,step:aStep,
           title:"[Async] "+asm.label+": "+aUnit.name,
-          desc:aDesc,type:asm.type,mins:aMins,
-          isFirst:false,
-          steps:aSteps,ai:aAi,
-          done:t.completedSteps.includes(aKey)
-        });
+          desc:aDescs[aStep]||"",type:asm.type,mins:asm.mins||aUnit.est,isFirst:false,
+          steps:[],ai:null,done:t.completedSteps.includes(aKey)});
       } else {
-        // All async steps done today — clear the slot
         S.today.asyncSkillId=null;S.today.asyncUnitIndex=null;saveLocal();
       }
     }
@@ -793,7 +766,6 @@ function buildQueue(){
 
   return tasks;
 }
-
 // ─── RENDER TODAY ────────────────────────────────────────────────────────────
 function renderToday(){
   checkRollover();
@@ -852,18 +824,19 @@ function renderToday(){
     </div>`;
   }
 
-  const sp=getSP(S.activeSkillId);
-  const units=getUnits(S.activeSkillId);
-  const curUnit=units[sp.currentUnitIndex]?units[sp.currentUnitIndex].name:(sp.synthesisDone?"Complete ✓":"—");
+  const nextSid=getNextSkillId();
+  const nextUnits=nextSid?getUnits(nextSid):[];
+  const nextSp=nextSid?getSP(nextSid):null;
+  const curUnit=nextSp&&nextUnits[nextSp.currentUnitIndex]?nextUnits[nextSp.currentUnitIndex].name:(nextSp&&nextSp.synthesisDone?"Complete":"—");
   const dueR=S.spacedRecalls.filter(r=>!r.done&&new Date(r.dueDate)<=new Date()).length;
+  const activeBatch=getActiveBatch();
 
   let html=`<div class="prog-track"><div class="prog-fill" style="width:${pct}%"></div></div>`;
   html+=`<div class="info-bar">
-    <div class="ib-item"><div class="ib-label">active skill</div><div class="ib-val ib-accent">${S.activeSkillId}</div></div>
-    <div class="ib-item"><div class="ib-label">current unit</div><div class="ib-val" style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${curUnit}</div></div>
-    <div class="ib-item"><div class="ib-label">units done</div><div class="ib-val">${sp.unitsCompleted}${units.length>0?' / '+units.length:''}</div></div>
+    <div class="ib-item"><div class="ib-label">active batch</div><div class="ib-val ib-accent">${activeBatch?activeBatch.label:"—"}</div></div>
+    <div class="ib-item"><div class="ib-label">next skill</div><div class="ib-val">${nextSid||"—"}</div></div>
+    <div class="ib-item"><div class="ib-label">next unit</div><div class="ib-val" style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${curUnit}</div></div>
     <div class="ib-item"><div class="ib-label">recalls due</div><div class="ib-val${dueR>0?' ib-accent':''}">${dueR}</div></div>
-    <div class="ib-item"><div class="ib-label">today</div><div class="ib-val">${pct}%</div></div>
   </div>`;
 
   if(pending.length===0&&done.length===0){
@@ -902,6 +875,7 @@ function markStep(skillId,unitIndex,step,taskId){
   // Complete unit after Write note
   if(step==="notes"){
     sp.unitsCompleted++;
+    sp.sessionsThisBatch=(sp.sessionsThisBatch||0)+1;
     sp.currentUnitIndex=unitIndex+1;
     sp.cyclesCompleted.push({unitIndex,date:todayStr()});
     scheduleRecalls(skillId,unitIndex);
@@ -972,6 +946,7 @@ function markAsyncStep(skillId,unitIndex,step,taskId){
   if(step==="apply")sp.stageApply=true;
   if(step==="notes"){
     sp.unitsCompleted++;
+    sp.sessionsThisBatch=(sp.sessionsThisBatch||0)+1;
     sp.currentUnitIndex=unitIndex+1;
     sp.cyclesCompleted.push({unitIndex,date:todayStr()});
     scheduleRecalls(skillId,unitIndex);
@@ -994,7 +969,8 @@ function scheduleRecalls(skillId,unitIndex){
 
 function skipUnit(){
   if(!confirm("Skip current unit? Learning cycle won't be complete."))return;
-  const sp=getSP(S.activeSkillId);
+  const sid=getNextSkillId();if(!sid)return;
+  const sp=getSP(sid);
   sp.currentUnitIndex++;
   S.today.pendingRecallWarning=false;S.today.pendingRecallSkillId=null;S.today.pendingRecallUnitIndex=null;
   saveLocal(); renderToday();
@@ -1016,7 +992,7 @@ function renderSkillsAll(){
     <div class="stat"><div class="stat-n">${S.sessionCount}</div><div class="stat-l">units completed</div></div>
     <div class="stat"><div class="stat-n">${dueR}</div><div class="stat-l">recalls due</div></div>`;
   const root=document.getElementById("batches-root");if(!root)return;root.innerHTML="";
-  const bmap={p:"Priority",a:"Core skills",n:"Next up",l:"Later",x:"Async"};
+  const bmap={p:"Batch 1",a:"Batch 2",n:"Batch 3",l:"Batch 4",x:"Async"};
   const bcls={p:"badge-p",a:"badge-a",n:"badge-n",l:"badge-l",x:"badge-x"};
   S.batches.forEach((batch,bi)=>{
     const sec=document.createElement("div");sec.className="batch-section";
@@ -1061,7 +1037,7 @@ function renderSkillsBatch(bi){
       <div class="stages-auto">${stagesHtml}</div>
       <div class="sk-acts">
         <button class="act" onclick="toggleNotes(this)">notes</button>
-        ${!isCur?`<button class="act" onclick="setActive('${sk.id}')">set active</button>`:''}
+        ${inActiveBatch?`<span style="font-size:10px;font-family:var(--mono);color:var(--text3);display:flex;align-items:center;gap:5px">priority <input type="range" min="1" max="5" value="${getSP(sk.id).priority||3}" style="width:56px;cursor:pointer;accent-color:var(--accent)" oninput="setPriority('${sk.id}',this.value)"> <span id="pri-${sk.id}">${getSP(sk.id).priority||3}</span></span>":''}
         <button class="act" style="margin-left:auto;color:var(--red)" onclick="removeSkill(${bi},${si})">remove</button>
       </div>
       <div class="notes-wrap"><textarea class="nta" placeholder="Notes, links, insights..." onchange="saveSkNote(${bi},${si},this.value)">${sk.notes||''}</textarea></div>`;
@@ -1069,6 +1045,11 @@ function renderSkillsBatch(bi){
   });
 }
 
+function setPriority(skillId,val){
+  const sp=getSP(skillId);sp.priority=parseInt(val);
+  const el=document.getElementById("pri-"+skillId);if(el)el.textContent=val;
+  save();
+}
 function setActive(id){S.activeSkillId=id;S.today.pendingRecallWarning=false;S.today.pendingRecallSkillId=null;S.today.pendingRecallUnitIndex=null;saveLocal();renderSkillsAll();renderToday();}
 function activateAsyncUnit(skillId,unitIndex){
   if(S.today.asyncSkillId&&S.today.asyncSkillId!==skillId){
