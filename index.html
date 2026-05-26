@@ -206,7 +206,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14
 <div class="shell">
 <nav class="sidebar">
   <div class="sidebar-logo">
-    <div class="logo-tag">v2.6</div>
+    <div class="logo-tag">v2.7</div>
     <div class="logo-title">DE<br><span class="logo-accent">Learning</span></div>
   </div>
   <div class="nav-section">Daily</div>
@@ -849,7 +849,7 @@ function renderToday(){
     <div class="ib-item"><div class="ib-label">active batch</div><div class="ib-val ib-accent">${activeBatch?activeBatch.label:"—"}</div></div>
     <div class="ib-item"><div class="ib-label">next skill</div><div class="ib-val">${nextSid||"—"}</div></div>
     <div class="ib-item"><div class="ib-label">next unit</div><div class="ib-val" style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${curUnit}</div></div>
-    <div class="ib-item"><div class="ib-label">recalls due</div><div class="ib-val${dueR>0?' ib-accent':''}">${dueR}</div></div>
+    <div class="ib-item"><div class="ib-label">recalls due</div><div class="ib-val${dueR>0?" ib-accent":""}">${dueR}</div></div>
   </div>`;
 
   if(pending.length===0&&done.length===0){
@@ -1032,11 +1032,11 @@ function renderSkillsBatch(bi){
     const isCur=sk.id===S.activeSkillId;
     const stages=[
       {label:"Orient",done:sp.stageOrient,active:!sp.stageOrient&&isCur},
-      {label:`Study ${sp.unitsCompleted}/${units.length||'?'}`,done:units.length>0&&sp.unitsCompleted>=units.length,active:sp.stageOrient&&units.length>0&&sp.unitsCompleted<units.length&&isCur},
+      {label:`Study ${sp.unitsCompleted}/${units.length||"?"}`,done:units.length>0&&sp.unitsCompleted>=units.length,active:sp.stageOrient&&units.length>0&&sp.unitsCompleted<units.length&&isCur},
       {label:"Apply",done:sp.stageApply,active:sp.stageOrient&&!sp.stageApply&&isCur},
       {label:"Consolidate",done:sp.stageConsolidate,active:sp.stageApply&&!sp.stageConsolidate&&isCur}
     ];
-    const stagesHtml=stages.map(s=>`<span class="stage-pip${s.done?' done':s.active?' active':''}">${s.label}</span>`).join('');
+    const stagesHtml=stages.map(s=>`<span class="stage-pip${s.done?" done":s.active?" active":''}">${s.label}</span>`).join("");
     const div=document.createElement("div");div.className="skill-card"+(isCur?" is-current":"");
     div.innerHTML=`
       <div class="sk-top">
@@ -1050,10 +1050,10 @@ function renderSkillsBatch(bi){
       <div class="stages-auto">${stagesHtml}</div>
       <div class="sk-acts">
         <button class="act" onclick="toggleNotes(this)">notes</button>
-        ${inActiveBatch?`<span style="font-size:10px;font-family:var(--mono);color:var(--text3);display:flex;align-items:center;gap:5px">priority <input type="range" min="1" max="5" value="${getSP(sk.id).priority||3}" style="width:56px;cursor:pointer;accent-color:var(--accent)" oninput="setPriority('${sk.id}',this.value)"> <span id="pri-${sk.id}">${getSP(sk.id).priority||3}</span></span>":''}
+        ${inActiveBatch?`<span style="font-size:10px;font-family:var(--mono);color:var(--text3);display:flex;align-items:center;gap:5px">priority <input type="range" min="1" max="5" value="${getSP(sk.id).priority||3}" style="width:56px;cursor:pointer;accent-color:var(--accent)" oninput="setPriority('${sk.id}',this.value)"> <span id="pri-${sk.id}">${getSP(sk.id).priority||3}</span></span>`:""}
         <button class="act" style="margin-left:auto;color:var(--red)" onclick="removeSkill(${bi},${si})">remove</button>
       </div>
-      <div class="notes-wrap"><textarea class="nta" placeholder="Notes, links, insights..." onchange="saveSkNote(${bi},${si},this.value)">${sk.notes||''}</textarea></div>`;
+      <div class="notes-wrap"><textarea class="nta" placeholder="Notes, links, insights..." onchange="saveSkNote(${bi},${si},this.value)">${sk.notes||""}</textarea></div>`;
     c.appendChild(div);
   });
 }
