@@ -1050,7 +1050,7 @@ function renderSkillsBatch(bi){
       <div class="stages-auto">${stagesHtml}</div>
       <div class="sk-acts">
         <button class="act" onclick="toggleNotes(this)">notes</button>
-        ${inActiveBatch?`<span style="font-size:10px;font-family:var(--mono);color:var(--text3);display:flex;align-items:center;gap:5px">priority <input type="range" min="1" max="5" value="${getSP(sk.id).priority||3}" style="width:56px;cursor:pointer;accent-color:var(--accent)" oninput="setPriority('${sk.id}',this.value)"> <span id="pri-${sk.id}">${getSP(sk.id).priority||3}</span></span>`:""}
+        ${S.batches[bi].id===S.activeBatchId?`<span style="font-size:10px;font-family:var(--mono);color:var(--text3);display:flex;align-items:center;gap:5px">priority <input type="range" min="1" max="5" value="${getSP(sk.id).priority||3}" style="width:56px;cursor:pointer;accent-color:var(--accent)" oninput="setPriority('${sk.id}',this.value)"> <span id="pri-${sk.id}">${getSP(sk.id).priority||3}</span></span>`:""}
         <button class="act" style="margin-left:auto;color:var(--red)" onclick="removeSkill(${bi},${si})">remove</button>
       </div>
       <div class="notes-wrap"><textarea class="nta" placeholder="Notes, links, insights..." onchange="saveSkNote(${bi},${si},this.value)">${sk.notes||""}</textarea></div>`;
@@ -1292,7 +1292,7 @@ function loadSuggested(sid){
 function refreshExport(){const el=document.getElementById("export-area");if(el)el.textContent=JSON.stringify(S,null,2);}
 function copyExport(){navigator.clipboard.writeText(JSON.stringify(S,null,2)).then(()=>{const m=document.getElementById("export-msg");m.className="msg-ok";m.textContent="Copied.";setTimeout(()=>m.textContent="",2500);});}
 function downloadExport(){const b=new Blob([JSON.stringify(S,null,2)],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="de_learning_system_"+new Date().toISOString().slice(0,10)+".json";a.click();}
-function doImport(){const ta=document.getElementById("import-ta");const m=document.getElementById("import-msg");try{S=JSON.parse(ta.value.trim());saveLocal();renderAll();m.className="msg-ok";m.textContent="Imported.";setTimeout(()=>m.textContent="",2500);}catch(e){m.className="msg-err";m.textContent="Invalid JSON.";}}
+function doImport(){const ta=document.getElementById("import-ta");const m=document.getElementById("import-msg");let parsed;try{parsed=JSON.parse(ta.value.trim());}catch(e){m.className="msg-err";m.textContent="Invalid JSON.";return;}S=parsed;saveLocal();renderAll();m.className="msg-ok";m.textContent="Imported.";setTimeout(()=>m.textContent="",2500);}
 
 // ─── NAV ─────────────────────────────────────────────────────────────────────
 function go(id,el){
@@ -1307,7 +1307,7 @@ function go(id,el){
 }
 function goExport(){
   const navItems = document.querySelectorAll('.nav-item');
-  navItems.forEach(n=>{ if(n.textContent.trim().startsWith('Export')) go('export',n); });
+  navItems.forEach(n=>{ if(n.textContent.trim().includes('Export')) go('export',n); });
 }
 function renderAll(){renderToday();renderSkillsAll();renderUnits();renderReading();refreshExport();renderGistSetup();}
 
